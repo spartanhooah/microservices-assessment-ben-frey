@@ -3,6 +3,7 @@ package net.frey.orders.controller;
 import lombok.RequiredArgsConstructor;
 import net.frey.orders.model.Customer;
 import net.frey.orders.service.CustomerService;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -19,6 +20,6 @@ public class CustomerController {
     public ResponseEntity<Customer> save(@RequestBody Customer customer) {
         var savedCustomer = customerService.saveCustomer(customer);
 
-        return ResponseEntity.ok(savedCustomer);
+        return ResponseEntity.status(HttpStatus.CREATED).body(savedCustomer);
     }
 }
