@@ -1,0 +1,66 @@
+spring:
+  application:
+    name: orders
+  jpa:
+    hibernate:
+      ddl-auto: none
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+  kafka:
+    admin:
+      auto-create: false
+    bootstrap-servers: kafka:9092
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+    consumer:
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
+      group-id: orders-group
+      properties:
+        spring.json.trusted.packages: "net.frey.orders.model,net.frey.orders.dto"
+  security:
+    oauth2:
+      resourceserver:
+        jwt: thisisalongstringthatwillbeover32characterstomakehmachappyd
+  sql:
+    init:
+      mode: always
+      schema-locations: classpath:schema.sql
+
+app:
+  kafka:
+    order-topic: "orders.topic"
+
+server:
+  servlet:
+    context-path: /v1/eshop
+
+multitenancy:
+  defaultTenant: companyA
+  tenants:
+    companyA:
+      url: jdbc:postgresql://db-company-a:5432/orders_company_a
+      username: orders
+      password: example
+      driver-className: org.postgresql.Driver
+    companyB:
+      url: jdbc:postgresql://db-company-b:5432/orders_company_b
+      username: orders
+      password: example
+      driver-className: org.postgresql.Driver
+
+management:
+  otlp:
+    metrics:
+      export:
+        enabled: false
+    tracing:
+      export:
+        enabled: false
+
+logging:
+  level:
+    org.apache.kafka.clients.admin.internals.AdminMetadataManager: ERROR
+    org.springframework.kafka.core.KafkaTemplate: DEBUG

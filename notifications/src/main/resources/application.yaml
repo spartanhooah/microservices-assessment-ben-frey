@@ -1,0 +1,24 @@
+spring:
+  application:
+    name: notifications
+  kafka:
+    admin:
+      auto-create: false
+    bootstrap-servers: kafka:9092
+    consumer:
+      group-id: notification-service-group
+      auto-offset-reset: earliest
+      value-deserializer: org.apache.kafka.common.serialization.ByteArrayDeserializer
+    properties:
+      spring:
+        json:
+          trusted.packages: "net.frey.notifications.model"
+
+management:
+  otlp:
+    metrics:
+      export:
+        enabled: false
+    tracing:
+      export:
+        enabled: false

@@ -1,0 +1,73 @@
+services:
+  kafka:
+    image: apache/kafka:3.7.0
+    container_name: kafka
+    environment:
+      KAFKA_NODE_ID: 1
+      KAFKA_PROCESS_ROLES: broker,controller
+      KAFKA_LISTENERS: INTERNAL://:9092,CONTROLLER://:9093
+      KAFKA_ADVERTISED_LISTENERS: INTERNAL://kafka:9092
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: INTERNAL:PLAINTEXT,CONTROLLER:PLAINTEXT
+      KAFKA_CONTROLLER_LISTENER_NAMES: CONTROLLER
+      KAFKA_INTER_BROKER_LISTENER_NAME: INTERNAL
+      KAFKA_CONTROLLER_QUORUM_VOTERS: 1@kafka:9093
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_OFFSETS_TOPIC_NUM_PARTITIONS: 1
+
+  orders:
+    build: ./orders
+    ports:
+      - "8080:8080"
+    environment:
+        - GRADLE_USER_HOME=/home/gradle/.gradle
+    volumes:
+      - gradle_cache_orders:/home/gradle/.gradle
+    depends_on:
+      - db-company-a
+      - db-company-b
+      - kafka
+
+  notifications:
+    build: ./notifications
+    ports:
+      - "8081:8081"
+    environment:
+        - GRADLE_USER_HOME=/home/gradle/.gradle
+    volumes:
+      - gradle_cache_notifications:/home/gradle/.gradle
+    depends_on:
+      - kafka
+
+  db-company-a:
+    image: postgres
+    container_name: orders-db-company-a
+    restart: always
+    shm_size: 128mb
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_USER: orders
+      POSTGRES_PASSWORD: example
+      POSTGRES_DB: orders_company_a
+    volumes:
+      - postgres_data_company_a:/var/lib/postgresql
+
+  db-company-b:
+    image: postgres
+    container_name: orders-db-company-b
+    restart: always
+    shm_size: 128mb
+    ports:
+      - "5433:5432"
+    environment:
+      POSTGRES_USER: orders
+      POSTGRES_PASSWORD: example
+      POSTGRES_DB: orders_company_b
+    volumes:
+      - postgres_data_company_b:/var/lib/postgresql
+
+volumes:
+  postgres_data_company_a:
+  postgres_data_company_b:
+  gradle_cache_orders:
+  gradle_cache_notifications:
